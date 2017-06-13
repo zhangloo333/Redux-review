@@ -1,6 +1,4 @@
 import {createStore} from 'redux';
-
-
 console.log('starting todo redux test');
 
 const stateDefault = {
@@ -9,10 +7,24 @@ const stateDefault = {
     todos:[]
 };
 
+
+
 var reduer = (state = stateDefault, action) => {
-  return state;
+  switch(action.type) {
+    case "CHANG_STEXT":
+      return{
+        ...state,
+        searchText:action.searchText
+      }
+    default:
+      return state;
+  }
 }
 
 let store = createStore(reduer);
 
+store.dispatch({
+  type:'CHANG_STEXT',
+  searchText: 'youtube video'
+})
 console.log('currentSate',store.getState());
