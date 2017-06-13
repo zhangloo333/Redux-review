@@ -1,1 +1,2 @@
-# Redux-review
+# React-redux-template
+template
