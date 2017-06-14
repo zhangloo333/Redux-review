@@ -3,6 +3,11 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 console.log('starting redux test');
 
+let stateDefault ={
+  name: 'Anonymous',
+  hobbies: []
+}
+
 let reduer = (state,action) => {
   state = state || {name: 'Anoymous'};
   switch(action.type) {
