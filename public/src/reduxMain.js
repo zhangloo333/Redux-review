@@ -1,4 +1,4 @@
-import { createStore, compose } from 'redux';
+import { createStore, compose,combineReducers } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 
 console.log('starting redux test');
@@ -11,7 +11,7 @@ let stateDefault ={
 
 let nextHobbyId = 1;
 let nextMovieId = 1;
-let reduer = (state,action) => {
+let oldreduer = (state,action) => {
   state = state || stateDefault;
   switch(action.type) {
     case 'CHANG_NAME':
@@ -61,7 +61,62 @@ let reduer = (state,action) => {
       return state;
   }
 }
+//你把reducer 切分之后，state 只代表在 整个tree里面的一部分。
+let nameReducer = (state = 'Anonymous', action)=> {
+  switch(action.type) {
+    case 'CHANG_NAME':
+      return action.name;
+    default:
+      return state;
+  }
+}
 
+
+let hobbiesReducer = (state = [], action) => {
+  switch(action.type) {
+    default:
+      return state;
+    case 'ADD_HOBBY':
+      return [
+        ...state,
+        {
+          id: nextHobbyId++,
+          hobby: action.hobby
+        }
+      ];
+    case 'REMOVE_HOBBY':
+      return state.filter((e) => e.id !== action.id);
+  }
+}
+
+let moviesReducer = (state = [],action) => {
+  switch(action.type) {
+    default:
+      return state;
+    case 'ADD_MOVIE':
+      return [
+        ...state,
+        {
+          id: nextMovieId++,
+          title: action.title,
+          genre: action.genre
+        }
+      ];
+    case 'REMOVE_MOVIE':
+      return state.filter((movie) => movie.id !== action.id)
+  }
+}
+
+
+let reduer = combineReducers({
+  name: nameReducer,
+  hobbies:hobbiesReducer,
+  movies: moviesReducer
+})
+
+
+
+//----
 let store = createStore(reduer, compose(
   window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
