@@ -1,11 +1,7 @@
 import { createStore, compose,combineReducers } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
-
+import axios from 'axios';
 console.log('starting redux test');
-
-
-
-
 
 //你把reducer 切分之后，state 只代表在 整个tree里面的一部分。
 
@@ -98,13 +94,53 @@ let removeMovice = (id) => {
     id
   }
 }
+//map Reducer and action generator
+//------------------------
+let mapReducer = (state = {isFetching: false, url:undefined},action) => {
+  switch (action.type) {
+    case 'START_LOCATION_FETCH':
+        return {
+          isFetching: true,
+          url: undefined
+        };
+    case 'COMPLETE_LOCATION_FETCH':
+      return{
+          isFetching:false,
+          url:action.url
+      };
+    default:
+      return state
+  }
+}
 
+let startLocationFetch = () => {
+  return{
+    type: 'START_LOCATION_FETCH'
+  }
+}
+
+let completeLocationFetch = (url) => {
+  return {
+    type:'COMPLETE_LOCATION_FETCH',
+    url
+  }
+}
+
+let fetchLocation = () => {
+  store.dispatch(startLocationFetch());
+  axios.get('http://ipinfo.io').then(function(res) {
+    let loc = res.data.loc;
+    var baseUrl = 'http://maps.google.com?q=';
+    store.dispatch(completeLocationFetch(baseUrl+loc));
+  })
+}
 
 //-----build a reducer
 let reduer = combineReducers({
   name: nameReducer,
   hobbies:hobbiesReducer,
-  movies: moviesReducer
+  movies: moviesReducer,
+  map: mapReducer
 })
 
 //----store
@@ -115,17 +151,20 @@ let store = createStore(reduer, compose(
 // subscrib to changes
 let unsubscribe = store.subscribe(() => {
   let state = store.getState();
-  console.log('Name is', state.name);
-  document.getElementById('app').innerHTML = state.name;
-
   console.log('new state', store.getState());
+
+  if(state.map.isFetching) {
+    document.getElementById('app').innerHTML = 'Loading.....';
+  } else if(state.map.url) {
+    document.getElementById('app').innerHTML = '<a href="'+state.map.url+'" target="_blank">view your Location</a>';
+  }
 
 })
 // unsubscribe();//this is for unsubscribe;
 
 let currentState = store.getState();
 console.log('currentSate', currentState);
-
+fetchLocation();
 
 
 store.dispatch(changeName('jonason'));
